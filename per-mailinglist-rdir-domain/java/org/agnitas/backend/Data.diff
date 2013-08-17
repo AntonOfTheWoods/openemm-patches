@@ -1,0 +1,4 @@
+464c464
+<         rc = dbase.querys ("SELECT shortname, xor_key, rdir_domain, mailloop_domain FROM company_tbl WHERE company_id = :companyID", "companyID", company_id);
+---
+> 	rc = dbase.querys ("SELECT c.shortname, c.xor_key, if(not ml.rdir_domain is null  and ml.rdir_domain != '', ml.rdir_domain, c.rdir_domain) as rdir_domain, c.mailloop_domain FROM company_tbl c inner join mailinglist_tbl ml on c.company_id = ml.company_id  WHERE ml.mailinglist_id = :mailinglistID and ml.company_id = :companyID", "companyID", company_id, "mailinglistID", mailinglist_id);
