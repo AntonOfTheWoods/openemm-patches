@@ -461,11 +461,14 @@ public class Data {
         Map <String, Object>    rc;
 
         mailtracking_table = "mailtrack_tbl";
-	rc = dbase.querys ("SELECT c.shortname, c.xor_key, if(not ml.rdir_domain is null  and ml.rdir_domain != '', ml.rdir_domain, c.rdir_domain) as rdir_domain, c.mailloop_domain FROM company_tbl c inner join mailinglist_tbl ml on c.company_id = ml.company_id  WHERE ml.mailinglist_id = :mailinglistID and ml.company_id = :companyID", "companyID", company_id, "mailinglistID", mailinglist_id);
+	rc = dbase.querys ("SELECT c.shortname, c.xor_key, if(not ml.rdir_domain is null and ml.rdir_domain != '', ml.rdir_domain, c.rdir_domain) as rdir_domain, c.mailloop_domain, if(not ml.messageid_domain is null and ml.messageid_domain != '', ml.messageid_domain, c.mailloop_domain) as messageid_domain FROM company_tbl c inner join mailinglist_tbl ml on c.company_id = ml.company_id  WHERE ml.mailinglist_id = :mailinglistID and ml.company_id = :companyID", "companyID", company_id, "mailinglistID", mailinglist_id);
         company_name = dbase.asString (rc.get ("shortname"));
         password = dbase.asString (rc.get ("xor_key"));
         rdirDomain = dbase.asString (rc.get ("rdir_domain"));
         mailloopDomain = dbase.asString (rc.get ("mailloop_domain"));
+	String tmpDomain = dbase.asString (rc.get ("messageid_domain"));
+	if (tmpDomain != null && tmpDomain.length() > 0)
+	    domain = tmpDomain;
     }
 
     public Object mkTarget (long tid, String sql) {
@@ -1201,7 +1204,7 @@ public class Data {
             ((sampleEmails.length () == 0) || sampleEmails.equals ("-"))) {
             sampleEmails = null;
         }
-        domain = cfg.cget ("DOMAIN", domain);
+	domain = cfg.cget ("DOMAIN", domain);
         boundary = cfg.cget ("BOUNDARY", boundary);
         if ((val = cfg.cget ("EOL")) != null) {
             if (val.equalsIgnoreCase ("CRLF")) {
