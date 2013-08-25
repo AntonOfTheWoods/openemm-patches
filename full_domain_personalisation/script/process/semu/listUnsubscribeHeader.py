@@ -1,22 +1,25 @@
 __aps__ = {
-        'api':          '1.0.0',
-        'version':      '1.0',
-        'uri':          None,
-        'urimatrix':    None
+    'api':          '1.0.0',
+    'version':      '1.0',
+    'uri':          None,
+    'urimatrix':    None
 }
 import re
 #
-def handleOutgoingMail (ctx, mail):
+
+
+def handleOutgoingMail(ctx, mail):
         urimatrix = __aps__['urimatrix']
         uri = __aps__['uri']
         if urimatrix or uri:
                 found = None
                 mid = None
                 for line in mail.head:
-                        if line.lower ().startswith ('list-unsubscribe:'):
+                        if line.lower().startswith('list-unsubscribe:'):
                                 found = line
                         elif line.lower().startswith('message-id:'):
-                                m = re.search('Message-ID: <(?P<mid>.*)@.*>', line)
+                                m = re.search(
+                                    'Message-ID: <(?P<mid>.*)@.*>', line)
                                 mid = m.group(1)
                 if found is None:
                         try:
@@ -24,39 +27,41 @@ def handleOutgoingMail (ctx, mail):
                         except ImportError:
                                 from urllib import quote
                         data = {
-                                'sender': mail.sender,
-                                'urlsender': quote (mail.sender),
-                                'recv': mail.receiver,
-                                'urlrecv': quote (mail.receiver),
-                                'mid': mid
+                            'sender': mail.sender,
+                            'urlsender': quote(mail.sender),
+                            'recv': mail.receiver,
+                            'urlrecv': quote(mail.receiver),
+                            'mid': mid
                         }
                         isInMatrix = False
                         if urimatrix and not mid is None:
                                 sDomain = mail.sender.rsplit('@', 1)[1]
                                 for cline in urimatrix.split('\n'):
                                         if cline.startswith(sDomain + '|'):
-                                                mail.head.append('List-Unsubscribe: <%s>, <%s>' % (cline.split('|')[1] % data, cline.split('|')[2] % data, ))
+                                                mail.head.append('List-Unsubscribe: <%s>, <%s>' % (
+                                                                 cline.split('|')[1] % data, cline.split('|')[2] % data, ))
                                                 isInMatrix = True
                                                 break
 
                         if uri and not isInMatrix:
-                                mail.head.append ('List-Unsubscribe: <%s>' % (uri % data, ))
+                                mail.head.append(
+                                    'List-Unsubscribe: <%s>' % (uri % data, ))
 
 if __name__ == '__main__':
-        def _main ():
+        def _main():
                 class struct:
                         pass
-                mail = struct ()
+                mail = struct()
                 mail.head = []
                 mail.sender = 'news@toto.com'
                 mail.receiver = 'someone@somewhere.com'
                 __aps__['uri'] = 'http://localhost/unsubscribe?%(urlrecv)s'
-                handleOutgoingMail (None, mail)
-                print mail.head[0]
-                
-                mail.head = []
-                __aps__['urimatrix'] = 'news.example.com|mailto:DUN-%(urlrecv)s@lu.example.com|http://news.example.com?%(urlrecv)s\nletter.com|mailto:ext-%(urlrecv)s@localhost|http://localhost?%(urlrecv)s'
-                handleOutgoingMail (None, mail)
+                handleOutgoingMail(None, mail)
                 print mail.head[0]
 
-        _main ()
+                mail.head = []
+                __aps__['urimatrix'] = 'news.example.com|mailto:DUN-%(urlrecv)s@lu.example.com|http://news.example.com?%(urlrecv)s\nletter.com|mailto:ext-%(urlrecv)s@localhost|http://localhost?%(urlrecv)s'
+                handleOutgoingMail(None, mail)
+                print mail.head[0]
+
+        _main()
