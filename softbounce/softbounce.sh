@@ -25,4 +25,4 @@
 #
 . $HOME/bin/scripts/config.sh
 #
-exec $HOME/bin/scripts/softbounce.py
+exec $HOME/bin/scripts/softbounce.py --bnccnt 7 --nbdays 30
