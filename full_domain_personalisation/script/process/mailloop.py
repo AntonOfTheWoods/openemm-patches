@@ -25,8 +25,6 @@ for record in curs.query("select param from mailing_mt_tbl"):
         if not m.group(1) is None:
                 emails.add(m.group(1))
 
-print emails
-
 mailloop = "select concat('ext_', b.rid, '@', a.mailloop_domain) from company_tbl a inner join "
 mailloop += "mailloop_tbl b on a.company_id = b.company_id where forward_enable = 0 and "
 mailloop += "ar_enable = 0 limit 1;"
