@@ -21,14 +21,14 @@ if curs is None:
 emails = set()
 
 for record in curs.query("select param from mailing_mt_tbl"):
-        m = re.search('from=".*<(.*)>', record[0])
+        m = re.search('from=".*?<(.*?)>', record[0])
         if not m.group(1) is None:
                 emails.add(m.group(1))
 
-mailloop = "select concat('ext_', b.rid, '@', a.mailloop_domain) from ' +
-'company_tbl a inner join "
-mailloop += "mailloop_tbl b on a.company_id = b.company_id where ' +
-'forward_enable = 0 and "
+print emails
+
+mailloop = "select concat('ext_', b.rid, '@', a.mailloop_domain) from company_tbl a inner join "
+mailloop += "mailloop_tbl b on a.company_id = b.company_id where forward_enable = 0 and "
 mailloop += "ar_enable = 0 limit 1;"
 
 mailloopAddress = ""
@@ -51,6 +51,7 @@ for email in emails:
                         break
 with open(localFilename, "w") as newfile:
         for dataline in data:
-                newfile.write(dataline + "\n")
+                if dataline.strip() != "":
+                        newfile.write(dataline.strip() + "\n")
         for newmail in newmails:
                 newfile.write(newmail + "\talias:" + mailloopAddress + "\n")
